@@ -1,0 +1,75 @@
+body {
+  font-family: 'Raleway', sans-serif;
+}
+
+.gallery {
+  justify-content: space-around;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  align-content: center;
+}
+
+.photo-card {
+  width: 300px;
+  margin: 10px;
+  padding: 10px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  background-color: #fff;
+  transition: box-shadow 0.3s ease;
+}
+
+.photo-card:hover {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.photo-card img {
+  width: 100%;
+  height: auto;
+}
+
+.info {
+  margin-top: 10px;
+}
+
+.info-item {
+  margin-bottom: 5px;
+}
+
+.message {
+  text-align: center;
+  font-size: 18px;
+  color: #333;
+  margin-top: 20px;
+}
+
+.search-form {
+  display: flex;
+  align-items: center;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f5f5f5;
+}
+
+.search-form input[type='text'] {
+  flex-grow: 1;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.search-form button[type='submit'] {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.search-form button[type='submit']:hover {
+  background-color: #45a049;
+}
