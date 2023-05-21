@@ -21,6 +21,10 @@ searchForm.addEventListener('submit', function (event) {
   searchImages();
 });
 
+function newFunction() {
+  document.cookie = 'cookieName=cookieValue; SameSite=None; Secure';
+}
+
 async function searchImages() {
   const url = `${baseURL}?key=${apiKey}&q=${currentQuery}&image_type=photo&orientation=horizontal&safesearch=true&page=${currentPage}&per_page=40`;
 
