@@ -11,18 +11,25 @@ const gallery = document.querySelector('.gallery');
 let currentQuery = '';
 let currentPage = 1;
 let loading = false;
+let totalPageCount = 1;
 
-searchForm.addEventListener('submit', function (event) {
+const lightbox = new SimpleLightbox('.gallery a', {});
+
+searchForm.addEventListener('submit', handleSubmit);
+
+async function handleSubmit(event) {
   event.preventDefault();
   const formData = new FormData(this);
   currentQuery = formData.get('searchQuery');
+
+  if (!currentQuery.trim()) {
+    displayMessage('Please enter a valid search query.');
+    return;
+  }
+
   currentPage = 1;
   clearGallery();
-  searchImages();
-});
-
-function newFunction() {
-  document.cookie = 'cookieName=cookieValue; SameSite=None; Secure';
+  await searchImages();
 }
 
 async function searchImages() {
@@ -38,6 +45,8 @@ async function searchImages() {
       );
       return;
     }
+
+    totalPageCount = Math.ceil(data.totalHits / 40); // Calculate total page count
 
     displayImages(data.hits);
     loading = false;
@@ -97,15 +106,21 @@ function displayMessage(message) {
 }
 
 function updateSimpleLightbox() {
-  const lightbox = new SimpleLightbox('.gallery a', {});
   lightbox.refresh();
 }
 
 function observeLastCard() {
   const observer = new IntersectionObserver(
     entries => {
-      if (entries[0].isIntersecting) {
+      if (
+        entries[0].isIntersecting &&
+        !loading &&
+        currentPage < totalPageCount
+      ) {
         loading = true;
+        observer.disconnect();
+
+        currentPage++;
         searchImages();
       }
     },
@@ -124,7 +139,11 @@ window.addEventListener('scroll', () => {
   const triggerHeight = cardHeight * 2;
   const scrollPosition = window.innerHeight + window.pageYOffset;
 
-  if (scrollPosition > triggerHeight && !loading) {
+  if (
+    scrollPosition > triggerHeight &&
+    !loading &&
+    currentPage < totalPageCount
+  ) {
     loading = true;
     currentPage++;
     searchImages();
