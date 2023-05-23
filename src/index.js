@@ -2,9 +2,10 @@ import Notiflix from 'notiflix';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 import axios from 'axios';
+import { searchImages } from './js/api';
+import { createImageCard } from './js/rendercard';
+import { observeLastCard } from './js/observer';
 
-const baseURL = 'https://pixabay.com/api/';
-const apiKey = '36274851-0167dd4a4908f41b50a6b64a2';
 const searchForm = document.getElementById('search-form');
 const gallery = document.querySelector('.gallery');
 
@@ -29,33 +30,30 @@ async function handleSubmit(event) {
 
   currentPage = 1;
   clearGallery();
-  await searchImages();
+  await performImageSearch();
 }
 
-async function searchImages() {
-  const url = `${baseURL}?key=${apiKey}&q=${currentQuery}&image_type=photo&orientation=horizontal&safesearch=true&page=${currentPage}&per_page=40`;
-
+async function performImageSearch() {
   try {
-    const response = await axios.get(url);
-    const data = response.data;
+    const images = await searchImages(currentQuery, currentPage);
 
-    if (data.hits.length === 0 && currentPage === 1) {
+    if (images.length === 0 && currentPage === 1) {
       displayMessage(
         'Sorry, there are no images matching your search query. Please try again.'
       );
       return;
     }
 
-    totalPageCount = Math.ceil(data.totalHits / 40); // Calculate total page count
+    totalPageCount = Math.ceil(images.length / 40);
 
-    displayImages(data.hits);
+    displayImages(images);
     loading = false;
 
     if (currentPage === 1) {
-      displayMessage(`Hooray! We found ${data.totalHits} images.`);
+      displayMessage(`Hooray! We found ${images.length} images.`);
     }
 
-    observeLastCard();
+    observeLastCard(gallery, loading, currentPage, totalPageCount);
   } catch (error) {
     console.error('Error:', error);
   }
@@ -65,30 +63,6 @@ function displayImages(images) {
   const imageCards = images.map(image => createImageCard(image));
   gallery.insertAdjacentHTML('beforeend', imageCards.join(''));
   updateSimpleLightbox();
-}
-
-function createImageCard(image) {
-  return `
-    <div class="photo-card">
-      <a href="${image.largeImageURL}" data-lightbox="gallery">
-        <img src="${image.webformatURL}" alt="${image.tags}" loading="lazy" />
-      </a>
-      <div class="info">
-        <p class="info-item">
-          <b>Likes:</b> ${image.likes}
-        </p>
-        <p class="info-item">
-          <b>Views:</b> ${image.views}
-        </p>
-        <p class="info-item">
-          <b>Comments:</b> ${image.comments}
-        </p>
-        <p class="info-item">
-          <b>Downloads:</b> ${image.downloads}
-        </p>
-      </div>
-    </div>
-  `;
 }
 
 function clearGallery() {
@@ -109,28 +83,6 @@ function updateSimpleLightbox() {
   lightbox.refresh();
 }
 
-function observeLastCard() {
-  const observer = new IntersectionObserver(
-    entries => {
-      if (
-        entries[0].isIntersecting &&
-        !loading &&
-        currentPage < totalPageCount
-      ) {
-        loading = true;
-        observer.disconnect();
-
-        currentPage++;
-        searchImages();
-      }
-    },
-    { threshold: 1 }
-  );
-
-  const lastCard = gallery.lastElementChild;
-  observer.observe(lastCard);
-}
-
 window.addEventListener('scroll', () => {
   const { height: cardHeight } = document
     .querySelector('.gallery')
@@ -146,6 +98,6 @@ window.addEventListener('scroll', () => {
   ) {
     loading = true;
     currentPage++;
-    searchImages();
+    performImageSearch();
   }
 });
