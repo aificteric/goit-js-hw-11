@@ -12,6 +12,7 @@ let currentQuery = '';
 let currentPage = 1;
 let loading = false;
 let endOfResults = false;
+let lightbox;
 
 searchForm.addEventListener('submit', function (event) {
   event.preventDefault();
@@ -125,7 +126,14 @@ function displayMessage(message) {
   Notiflix.Notify.info(message);
 }
 
-function updateSimpleLightbox() {
-  const lightbox = new SimpleLightbox('.gallery a', {});
-  lightbox.refresh();
+function initializeSimpleLightbox() {
+  lightbox = new SimpleLightbox('.gallery a', {});
 }
+
+function updateSimpleLightbox() {
+  if (lightbox) {
+    lightbox.refresh();
+  }
+}
+
+initializeSimpleLightbox();
