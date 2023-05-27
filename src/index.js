@@ -49,7 +49,7 @@ async function searchImages() {
       displayMessage(`Hooray! We found ${data.totalHits} images.`);
     }
 
-    if (currentPage >= Math.ceil(data.totalHits / 40)) {
+    if (currentPage > Math.ceil(data.totalHits / 40)) {
       endOfResults = true;
     }
 
@@ -58,11 +58,12 @@ async function searchImages() {
     }
   } catch (error) {
     console.error('Error:', error);
+    loading = false;
   }
 }
 
 function observeLastCard() {
-  if (endOfResults) {
+  if (loading || endOfResults) {
     return;
   }
 
@@ -78,8 +79,8 @@ function observeLastCard() {
   );
 
   const lastCard = gallery.lastElementChild;
-  if (lastCard) {
-    observer.observe(lastCard);
+  if (lastCard && lastCard.previousElementSibling) {
+    observer.observe(lastCard.previousElementSibling);
   } else {
     endOfResults = true;
   }
@@ -94,6 +95,7 @@ function displayImages(images) {
   gallery.insertAdjacentHTML('beforeend', imageCards.join(''));
   updateSimpleLightbox();
 
+  // Move observeLastCard() call here
   observeLastCard();
 }
 
