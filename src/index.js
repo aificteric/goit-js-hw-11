@@ -95,7 +95,6 @@ function displayImages(images) {
   gallery.insertAdjacentHTML('beforeend', imageCards.join(''));
   updateSimpleLightbox();
 
-  // Move observeLastCard() call here
   observeLastCard();
 }
 
