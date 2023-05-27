@@ -16,15 +16,20 @@ let lightbox;
 
 searchForm.addEventListener('submit', function (event) {
   event.preventDefault();
-  const formData = new FormData(this);
-  currentQuery = formData.get('searchQuery');
+  currentQuery = this.elements.searchQuery.value.trim();
   currentPage = 1;
   clearGallery();
   searchImages();
 });
 
 async function searchImages() {
-  const url = `${baseURL}?key=${apiKey}&q=${currentQuery}&image_type=photo&orientation=horizontal&safesearch=true&page=${currentPage}&per_page=40`;
+  const searchQuery = currentQuery.trim();
+  if (searchQuery === '') {
+    displayMessage('Please enter a search query.');
+    return;
+  }
+
+  const url = `${baseURL}?key=${apiKey}&q=${searchQuery}&image_type=photo&orientation=horizontal&safesearch=true&page=${currentPage}&per_page=40`;
 
   try {
     const response = await axios.get(url);
@@ -57,6 +62,10 @@ async function searchImages() {
 }
 
 function observeLastCard() {
+  if (endOfResults) {
+    return;
+  }
+
   const observer = new IntersectionObserver(
     entries => {
       if (entries[0].isIntersecting) {
