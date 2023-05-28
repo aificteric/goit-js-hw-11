@@ -49,7 +49,7 @@ async function searchImages() {
       displayMessage(`Hooray! We found ${data.totalHits} images.`);
     }
 
-    if (currentPage > Math.ceil(data.totalHits / 40)) {
+    if (currentPage >= Math.ceil(data.totalHits / 40)) {
       endOfResults = true;
     }
 
@@ -68,11 +68,11 @@ function observeLastCard() {
   }
 
   const observer = new IntersectionObserver(
-    entries => {
+    async entries => {
       if (entries[0].isIntersecting) {
         loading = true;
         currentPage++;
-        searchImages();
+        await searchImages();
       }
     },
     { threshold: 1 }
