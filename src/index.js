@@ -14,12 +14,14 @@ let loading = false;
 let endOfResults = false;
 let lightbox;
 
-searchForm.addEventListener('submit', function (event) {
+searchForm.addEventListener('submit', async function (event) {
   event.preventDefault();
   currentQuery = this.elements.searchQuery.value.trim();
   currentPage = 1;
   clearGallery();
-  searchImages();
+  endOfResults = false;
+  loading = false;
+  await searchImages();
 });
 
 async function searchImages() {
@@ -49,7 +51,10 @@ async function searchImages() {
       displayMessage(`Hooray! We found ${data.totalHits} images.`);
     }
 
-    if (currentPage >= Math.ceil(data.totalHits / 40)) {
+    const totalPages = Math.ceil(data.totalHits / 40);
+    if (currentPage < totalPages) {
+      currentPage++;
+    } else {
       endOfResults = true;
     }
 
@@ -71,7 +76,6 @@ function observeLastCard() {
     async entries => {
       if (entries[0].isIntersecting) {
         loading = true;
-        currentPage++;
         await searchImages();
       }
     },
@@ -79,8 +83,8 @@ function observeLastCard() {
   );
 
   const lastCard = gallery.lastElementChild;
-  if (lastCard && lastCard.previousElementSibling) {
-    observer.observe(lastCard.previousElementSibling);
+  if (lastCard && lastCard.classList.contains('photo-card')) {
+    observer.observe(lastCard);
   } else {
     endOfResults = true;
   }
@@ -101,7 +105,7 @@ function displayImages(images) {
 function createImageCard(image) {
   return `
     <div class="photo-card">
-      <a href="${image.largeImageURL}" data-lightbox="gallery">
+      <a href="${image.largeImageURL}">
         <img src="${image.webformatURL}" alt="${image.tags}" loading="lazy" />
       </a>
       <div class="info">
@@ -137,7 +141,9 @@ function displayMessage(message) {
 }
 
 function initializeSimpleLightbox() {
-  lightbox = new SimpleLightbox('.gallery a', {});
+  lightbox = new SimpleLightbox('.gallery a', {
+    disableScroll: false,
+  });
 }
 
 function updateSimpleLightbox() {
